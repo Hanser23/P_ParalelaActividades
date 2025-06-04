@@ -1,10 +1,11 @@
-#include <mpi.h>
 #include <stdio.h>
+#include <mpi.h>
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
     int rank, size;
-    int number;
+    const int TAM = 5;
+    int datos[TAM];
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -22,14 +23,27 @@ int main(int argc, char *argv[])
 
     if (rank == 0)
     {
-        number = 100;
-        MPI_Send(&number, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
-        printf("Proceso %d ha enviado el número %d al proceso 1.\n", rank, number);
+        for (int i = 0; i < TAM; i++)
+        {
+            datos[i] = i * 10;
+        }
+        MPI_Send(datos, TAM, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        printf("Proceso 0 envió el arreglo: ");
+        for (int i = 0; i < TAM; i++)
+        {
+            printf("%d ", datos[i]);
+        }
+        printf("\n");
     }
     else if (rank == 1)
     {
-        MPI_Recv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        printf("Proceso %d ha recibido el número %d del proceso 0.\n", rank, number);
+        MPI_Recv(datos, TAM, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        printf("Proceso 1 recibió el arreglo: ");
+        for (int i = 0; i < TAM; i++)
+        {
+            printf("%d ", datos[i]);
+        }
+        printf("\n");
     }
 
     MPI_Finalize();
