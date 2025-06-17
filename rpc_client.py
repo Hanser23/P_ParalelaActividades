@@ -8,3 +8,4 @@ try:
     print(f"El cuadrado de {numero} es: {resultado}")
 except Exception as e:
     print("Error en la llamada RPC:", e)
+5
