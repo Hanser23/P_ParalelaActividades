@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 
     if (rank == 0)
     {
-        printf("Introduce la cantidad de valores por proceso (N): ");
+        printf("Introduce la cantidad de valores por proceso (N):  ");
         scanf("%d", &N);
     }
 
