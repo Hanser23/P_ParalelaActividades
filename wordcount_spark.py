@@ -1,0 +1,43 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import explode, split, lower, col
+import time
+
+spark = SparkSession.builder \
+    .appName("WordCountRDDvsDataFrame") \
+    .getOrCreate()
+
+sc = spark.sparkContext
+
+file_path = "data/texto.txt"
+
+rdd_lines = sc.textFile(file_path)
+
+start_rdd = time.time()
+
+word_counts_rdd = rdd_lines.flatMap(lambda line: line.split()) \
+    .map(lambda word: (word.lower(), 1)) \
+    .reduceByKey(lambda a, b: a + b)
+
+word_counts_rdd.saveAsTextFile("output/wordcount_rdd")
+
+end_rdd = time.time()
+rdd_time = end_rdd - start_rdd
+
+df_lines = spark.read.text(file_path)
+
+start_df = time.time()
+
+words_df = df_lines.select(explode(split(lower(col("value")), "\\s+")).alias("word")) \
+    .groupBy("word").count() \
+    .orderBy("count", ascending=False)
+
+words_df.write.mode("overwrite").csv("output/wordcount_df")
+
+end_df = time.time()
+df_time = end_df - start_df
+
+print(f"\nDuración RDD: {rdd_time:.2f} segundos")
+print(f"Duración DataFrame: {df_time:.2f} segundos")
+print(f"Speedup (RDD/DataFrame): {rdd_time / df_time:.2f}x")
+
+spark.stop()

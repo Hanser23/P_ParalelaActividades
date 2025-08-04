@@ -1,0 +1,48 @@
+#!/bin/bash
+
+#==============================================================================
+# Estudiante: Hanser López
+# Matricula : 24-1237
+# Descripción del proceso:
+# Este proceso crea un archivo llamado usuarios.html que contiene
+# una página web con la información de los usuarios del sistema.
+#==============================================================================
+
+# Asignación de variables
+archivohtml=usuarios.html
+titulo="Usuarios del Sistema"
+
+# Mostrar encabezado en pantalla
+echo "=============================================================================="
+echo "Estudiante: Hanser López"
+echo "Matricula: 24-1237"
+echo "Descripción del proceso:"
+echo "Este proceso crea un archivo llamado usuarios.html que contiene una página web con la información de los usuarios del sistema."
+echo "=============================================================================="
+
+# Crear archivo HTML
+echo "<html>" > $archivohtml
+echo "<head>" >> $archivohtml
+echo "<meta charset=\"UTF-8\"><title>$titulo</title>" >> $archivohtml
+echo "</head>" >> $archivohtml
+echo "<body>" >> $archivohtml
+echo "<h1>Usuarios del Sistema</h1><hr/><br/>" >> $archivohtml
+echo "<table border=\"1\">" >> $archivohtml
+echo "<tr><th>Usuario</th><th>UID</th><th>GID</th><th>Home</th><th>Shell</th></tr>" >> $archivohtml
+
+# Listar usuarios con /bin/bash excluyendo root
+for registro in $(grep -w "/bin/bash" /etc/passwd | grep -vw "^root" | sort); do
+    usuario=$(echo $registro | cut -d: -f1)
+    uid=$(echo $registro | cut -d: -f3)
+    gid=$(echo $registro | cut -d: -f4)
+    home=$(echo $registro | cut -d: -f6)
+    shell=$(echo $registro | cut -d: -f7)
+
+    echo "<tr>" >> $archivohtml
+    echo "<td>$usuario</td><td>$uid</td><td>$gid</td><td>$home</td><td>$shell</td>" >> $archivohtml
+    echo "</tr>" >> $archivohtml
+done
+
+echo "</table>" >> $archivohtml
+echo "</body>" >> $archivohtml
+echo "</html>" >> $archivohtml
