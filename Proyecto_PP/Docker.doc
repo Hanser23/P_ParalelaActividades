@@ -1,0 +1,12 @@
+FROM mcr.microsoft.com/azure-functions/python:4-python3.11
+# Instalar CUDA libs compatibles con ACA GPU (T4/A100) y toolchain
+RUN apt-get update && apt-get install -y build-essential cuda-toolkit-12-2
+WORKDIR /home/site/wwwroot
+COPY app/ ./app/
+COPY src/ /build/
+RUN nvcc -O3 -Xcompiler -fPIC -shared /build/normalize.cu -o /app/libnormalize.so \
+ && g++ -O3 -fopenmp -shared -fPIC /build/normalize_omp.cpp -o /app/libnormalize_omp.so \
+ && pip install fastapi "uvicorn[standard]" cupy-cuda12x
+# Iniciar como Azure Function (func host arranca FastAPI vía custom handler)
+ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
+    AzureFunctionsJobHost__Logging__Console__IsEnabled=true
